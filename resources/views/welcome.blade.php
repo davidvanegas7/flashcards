@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Laravel</title>
+        <title>FlashCards</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,12 +17,11 @@
         @include('navbar-welcome')
         <div class="bg-gradient-to-b from-[#7267cb] to-[#6e3cbc] mx-auto px-4 min-h-[calc(100vh-60px)] flex flex-col-reverse md:flex-row items-center justify-center gap-4 py-6">
             <div class="w-content-text text-center text-white md:text-left md:w-1/2 space-y-4">
-                <h1 class="text-4xl md:text-5xl font-bold mb-6">Aprende de manera facíl y rapida</h1>
-                <p class="text-lg md:text-xl mb-4">Con Flash Cards crea tus propias cartas para ti y compartir
-                con mas gente tu baraja de cartas.</p>
-                <p class="text-lg md:text-xl mb-4">Aprovecha y disfruta la experiencia de usar esta app</p>
-                <p class="text-lg md:text-xl mb-6">Registrate y comienza a crear tus propias cartas</p> 
-                <a href="#" class="inline-block bg-white text-[#7267cb] border border-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors text-lg">Comienza ahora!</a>
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">{{ __('Learn quickly and easily') }}</h1>
+                <p class="text-lg md:text-xl mb-4">{{ __('With Flashcards you can create your own cards for yourself and share your deck of cards with more people.') }}</p>
+                <p class="text-lg md:text-xl mb-4">{{ __('Take advantage and enjoy the experience of using this app') }}</p>
+                <p class="text-lg md:text-xl mb-6">{{ __('Sign up and start creating your own cards') }}</p> 
+                <a href="#" class="inline-block bg-white text-[#7267cb] border border-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors text-lg">{{ __('Start now!') }}</a>
             </div>
             <div class="md:w-2/3">
                 <img src="{{ asset('img/telefono.png') }}" alt="Teléfono con flashcards" class="mx-auto"/>

@@ -15,19 +15,19 @@
             <div class="hidden md:flex items-center space-x-4">
                 <div>
                     <a href="/" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
-                        Contacto
+                        {{ __('Contact') }}
                     </a>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a class="navbar-boton-log bg-white text-[#7267cb] border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
+                    <a class="navbar-boton-log bg-white text-[#7267cb] border border-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
                        data-method="get" 
                        href="#">
-                        Crear Cuenta
+                       {{ __('Create Account') }}
                     </a>
-                    <a class="navbar-boton-log bg-white text-[#7267cb] border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
+                    <a class="navbar-boton-log bg-white text-[#7267cb] border border-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
                        data-method="get" 
                        href="#">
-                        Login
+                       {{ __('Log In') }}
                     </a>
                 </div>
             </div>
@@ -48,17 +48,17 @@
         <div class="md:hidden hidden" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1">
                 <a href="/" class="block text-center text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">
-                    Contacto
+                    {{ __('Contact') }}
                 </a>
-                <a class="block w-full text-center bg-white text-[#7267cb] border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
+                <a class="block w-full text-center bg-white text-[#7267cb] border border-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
                    data-method="get" 
                    href="#">
-                    Crear Cuenta
+                   {{ __('Create Account') }}
                 </a>
-                <a class="block w-full text-center bg-white text-[#7267cb] border border-blue-600 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
+                <a class="block w-full text-center bg-white text-[#7267cb] border border-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors" 
                    data-method="get" 
                    href="#">
-                    Login
+                   {{ __('Log In') }}
                 </a>
             </div>
         </div>
