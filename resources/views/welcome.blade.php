@@ -20,8 +20,8 @@
                 <h1 class="text-4xl md:text-5xl font-bold mb-6">{{ __('Learn quickly and easily') }}</h1>
                 <p class="text-lg md:text-xl mb-4">{{ __('With Flashcards you can create your own cards for yourself and share your deck of cards with more people.') }}</p>
                 <p class="text-lg md:text-xl mb-4">{{ __('Take advantage and enjoy the experience of using this app') }}</p>
-                <p class="text-lg md:text-xl mb-6">{{ __('Sign up and start creating your own cards') }}</p> 
-                <a href="#" class="inline-block bg-white text-[#7267cb] border border-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors text-lg">{{ __('Start now!') }}</a>
+                <p class="text-lg md:text-xl mb-6">{{ __('Sign up and start creating your own cards using AI') }}</p> 
+                <a href="{{ route('register') }}" class="inline-block bg-white text-[#7267cb] border border-blue-600 px-8 py-3 rounded-lg hover:bg-blue-50 transition-colors text-lg">{{ __('Start now!') }}</a>
             </div>
             <div class="md:w-2/3">
                 <img src="{{ asset('img/telefono.png') }}" alt="Teléfono con flashcards" class="mx-auto"/>
