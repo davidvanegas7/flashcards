@@ -16,7 +16,8 @@ This is an implementaiton of flashcards using the following stack:
 3. Run `npm install` to install the dependencies.
 4. Clone the .env configuration file and configure your environment accordingly.
 5. Run `php artisan migrate` to create the database tables.
-6. Run `php artisan serve` to start the server.
+6. Run `npm run build` to create the js and css of the project.
+7. Run `php artisan serve` to start the server.
 
 ## Updates:
 * [X] ~~*Update the welcome view and login/register*~~ [2025-02-13]
@@ -26,6 +27,10 @@ This is an implementaiton of flashcards using the following stack:
 * [ ] Create study section to study and check progress
 * [ ] Create public decks
 * [ ] Convert the web in a progressive app
+
+## URL
+
+[Flashcards](https://flashcards.davidvanegasdev.com)
 
 ## Screenshots
 
