@@ -1,7 +1,11 @@
+@php
+use Illuminate\Support\Js;
+@endphp
+
 <x-app-layout>
     <div class="py-12" x-data="{
-        question: '{{ old('question', $card->question) }}',
-        answer: '{{ old('answer', $card->answer) }}',
+        question: {{ Js::from(old('question', $card->question)) }},
+        answer: {{ Js::from(old('answer', $card->answer)) }},
         showAnswer: false
     }"
     @ai-response.window="answer = $event.detail.response"
