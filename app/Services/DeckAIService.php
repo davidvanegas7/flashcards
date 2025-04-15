@@ -23,14 +23,14 @@ class DeckAIService
             ->make();
     }
 
-    public function generateCards($title, $description, $category, $numCards = 5)
+    public function generateCards($title, $description, $category, $numCards = 5, $mode)
     {
         try {
-            $prompt = $this->buildPrompt($title, $description, $category, $numCards);
+            $prompt = $this->buildPrompt($title, $description, $category, $numCards, $mode);
             
             $response = $this->client->chat()->create([
                 // 'model' => 'gpt-4o-mini',
-                'model' => 'google/gemini-2.0-pro-exp-02-05:free',
+                'model' => 'google/gemini-2.5-pro-exp-03-25:free',
                 'messages' => [
                     [
                         'role' => 'system',
@@ -52,23 +52,39 @@ class DeckAIService
         }
     }
 
-    protected function buildPrompt($title, $description, $category, $numCards)
+    protected function buildPrompt($title, $description, $category, $numCards, $mode)
     {
-        return "Create {$numCards} flashcards for studying {$title}. 
-                Description: {$description}
-                Category: {$category}
-
-                **Important**: Ensure that each flashcard is different from previous ones. Avoid repeating similar questions or answers, and try to approach the topic from different angles.
-                
-                Please return the cards in this JSON format:
+        if ($mode == 'multiple') {
+            $json = "'cards': [
                 {
-                    'cards': [
-                        {
-                            'question': 'Question text here',
-                            'answer': 'Answer text here'
-                        }
-                    ]
-                }";
+                    'question': 'Question text here',
+                    'option1': 'Option answer 1 text here',
+                    'option2': 'Option answer 2 text here',
+                    'option3': 'Option answer 3 text here',
+                    'option4': 'Option answer 4 text here',
+                    'explanation': 'Explanation about the correct answer text here',
+                    'answer': 'Position between 1 and 4 indicating the correct answer between the options'
+                }
+            ]";
+        } else {
+            $json = "'cards': [
+                {
+                    'question': 'Question text here',
+                    'answer': 'Answer text here'
+                }
+            ]";
+        }
+
+        return "Create {$numCards} flashcards for studying {$title}. 
+        Description: {$description}
+        Category: {$category}
+
+        **Important**: Ensure that each flashcard is different from previous ones. Avoid repeating similar questions or answers, and try to approach the topic from different angles.
+        
+        Please return the cards in this JSON format:
+        {
+            {$json}
+        }";
     }
 
     protected function parseResponse($response)

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Models\ExpandedCard;
 use App\Models\Deck;
 use App\Services\CardAIService;
 use App\Services\DeckAIService;
@@ -77,16 +78,34 @@ class CardController extends Controller
                 $deck->name,
                 $deck->description,
                 $deck->category->name,
-                30
+                30,
+                $request->mode
             );
 
-            foreach ($cards as $c) {
-                $card = Card::create([
-                    'deck_id' => $deck->id,
-                    'user_id' => auth()->id(),
-                    'question' => $c['question'],
-                    'answer' => $c['answer'],
-                ]);
+            if ($request->mode == 'multiple') {
+                foreach ($cards as $c) {
+                    $card = ExpandedCard::create([
+                        'deck_id' => $deck->id,
+                        'user_id' => auth()->id(),
+                        'question' => $c['question'],
+                        'option1' => $c['option1'],
+                        'option2' => $c['option2'],
+                        'option3' => $c['option3'],
+                        'option4' => $c['option4'],
+                        'answer' => $c['answer'],
+                        'explanation' => $c['explanation'],
+                    ]);
+                }
+            }
+            else {
+                foreach ($cards as $c) {
+                    $card = Card::create([
+                        'deck_id' => $deck->id,
+                        'user_id' => auth()->id(),
+                        'question' => $c['question'],
+                        'answer' => $c['answer'],
+                    ]);
+                }
             }
 
             return response()->json([
@@ -180,5 +199,11 @@ class CardController extends Controller
     {
         $card->delete();
         return redirect()->route('cards.index', $card->deck_id)->with('success', 'Card deleted successfully');
+    }
+
+    public function playExpandedCards(Deck $deck)
+    {
+        $cards = $deck->expandedCards;
+        return view('play.cards', compact('deck', 'cards'));
     }
 }

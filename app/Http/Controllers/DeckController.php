@@ -41,6 +41,7 @@ class DeckController extends Controller
             'name' => 'required|max:255',
             'description' => 'nullable|string',
             'category' => 'required|string|max:255',
+            'multiple_options' => 'boolean',
         ]);
 
         $category = Category::firstOrCreate([
@@ -52,6 +53,7 @@ class DeckController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'],
             'category_id' => $category->id,
+            'is_multiple_selection' => $validated['multiple_options'] ?? false,
         ]);
 
         return redirect()->route('decks')->with('success', 'Deck created successfully');
@@ -65,7 +67,7 @@ class DeckController extends Controller
         $deck->load(['cards', 'category']);
     
         // Cargar contadores
-        $deck->cards_count = $deck->cards->count();
+        $deck->cards_count = $deck->cards->count() + $deck->expandedCards->count();
         $deck->mastered_cards_count = $deck->cards->where('mastered', true)->count();
         $deck->review_cards_count = $deck->cards->where('mastered', false)->count();
     
@@ -91,6 +93,7 @@ class DeckController extends Controller
             'name' => 'required|max:255',
             'description' => 'nullable|string',
             'category' => 'required|string|max:255',
+            'multiple_options' => 'boolean'
         ]);
 
         $category = Category::firstOrCreate([
@@ -101,6 +104,7 @@ class DeckController extends Controller
         $deck->name = $validated['name'];
         $deck->description = $validated['description'];
         $deck->category_id = $category->id;
+        $deck->is_multiple_selection = $validated['multiple_options'] ?? false;
         $deck->save();
 
         return redirect()->route('decks')->with('success', 'Deck updated successfully');

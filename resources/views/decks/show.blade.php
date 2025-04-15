@@ -20,6 +20,11 @@
                                         {{ __('Private') }}
                                     </span>
                                 @endif
+                                @if($deck->is_multiple_selection)
+                                    <span class="inline-flex text-center items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-black">
+                                        Multiple
+                                    </span>
+                                @endif
                             </div>
                             <p class="mt-2 text-gray-600">{{ $deck->description }}</p>
                         </div>
@@ -73,13 +78,23 @@
                             <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
                                 <x-primary-button
                                     class="w-full sm:w-auto justify-center"
-                                    onclick="generateCardsWithAI({{ $deck->id }})"
+                                    onclick="generateCardsWithAI({{ $deck->id }}, '{{ $deck->is_multiple_selection ? 'multiple' : 'single' }}')"
                                 >
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                     </svg>
                                     {{ __('Add Cards using AI')}}
                                 </x-primary-button>
+                                @if($deck->is_multiple_selection)
+                                <x-primary-button 
+                                    class="w-full sm:w-auto justify-center"
+                                    onclick="window.location='{{ route('play.expanded-cards', ['deck' => $deck->id]) }}'">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M8 5v14l11-7z"/>
+                                    </svg>
+                                    {{ __('Play')}}
+                                </x-primary-button>
+                                @else
                                 <x-primary-button 
                                     class="w-full sm:w-auto justify-center"
                                     onclick="window.location='{{ route('cards.create', ['deck' => $deck->id]) }}'">
@@ -88,10 +103,35 @@
                                     </svg>
                                     {{ __('Add Card')}}
                                 </x-primary-button>
+                                @endif
                             </div>
                         @endif
                     </div>
 
+                    @foreach($deck->expandedCards as $card)
+                    <div class="border rounded-lg mb-4 hover:shadow-md transition-shadow duration-200">
+                        <div class="p-4" x-data="{ showAnswer: false }">
+                            <div class="flex flex-col">
+                                <!-- Cabecera con pregunta y botones -->
+                                <div class="flex flex-col sm:flex-row justify-between items-start mb-4">
+                                    <p class="text-lg font-medium text-gray-900 mb-3 sm:mb-0">{{ $card->question }}</p>
+                                    <div class="flex space-x-2 w-full sm:w-auto">
+                                        
+                                    </div>
+                                </div>
+
+                                <!-- Respuesta -->
+                                <div x-show="showAnswer"
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                                    class="text-gray-600 whitespace-pre-line w-full">
+                                    {{ $card->answer }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
                     @forelse($deck->cards as $card)
                     <div class="border rounded-lg mb-4 hover:shadow-md transition-shadow duration-200">
                         <div class="p-4" x-data="{ showAnswer: false }">
@@ -125,6 +165,7 @@
                         </div>
                     </div>
                     @empty
+                        @if($deck->expandedCards->isEmpty())
                         <div class="text-center py-12">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -142,6 +183,7 @@
                                 </div>
                             @endif
                         </div>
+                        @endif
                     @endforelse
                 </div>
             </div>
@@ -160,7 +202,7 @@
     </div>
 </x-app-layout>
 <script>
-function generateCardsWithAI(deckId) {
+function generateCardsWithAI(deckId, mode) {
     const loadingModal = document.getElementById('loadingModal');
     loadingModal.classList.remove('hidden');
     loadingModal.classList.add('flex');
@@ -172,7 +214,8 @@ function generateCardsWithAI(deckId) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
-            deck_id: deckId
+            deck_id: deckId,
+            mode: mode
         })
     })
     .then(response => response.json())

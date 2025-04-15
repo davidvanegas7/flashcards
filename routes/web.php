@@ -32,6 +32,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('decks/{deck}/cards/{card}', [CardController::class, 'destroy'])->name('cards.destroy');
     Route::post('decks/cards/generateAI', [CardController::class, 'generateCardsUsingAI'])->name('cards.generateAI');
     Route::post('decks/cards/generateResponseAI', [CardController::class, 'generateResponseUsingAI'])->name('cards.generateResponseAI');
+
+    Route::get('decks/{deck}/expanded-cards', [CardController::class, 'playExpandedCards'])->name('play.expanded-cards');
 });
 
 require __DIR__.'/auth.php';

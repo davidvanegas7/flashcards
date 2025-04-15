@@ -28,7 +28,7 @@ class CardAIService
             $prompt = $this->buildPrompt($title, $description, $category, $question);
             
             $response = $this->client->chat()->create([
-                'model' => 'google/gemini-2.0-pro-exp-02-05:free',
+                'model' => 'google/gemini-2.5-pro-exp-03-25:free',
                 'messages' => [
                     [
                         'role' => 'system',
