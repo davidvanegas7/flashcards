@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use OpenAI\Client;
+use OpenAI\OpenAI;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Client;
 
 class CardAIService
 {
@@ -11,20 +12,27 @@ class CardAIService
     
     public function __construct()
     {
-        $this->client = \OpenAI::client(config('services.openai.api_key'));
+
+        $baseUrl = 'https://openrouter.ai/api/v1'; // Endpoint de OpenRouter
+        $apiKey = config('services.openrouterai.api_key');
+        
+        $this->client = \OpenAI::factory()
+            ->withApiKey($apiKey)
+            ->withBaseUri($baseUrl)
+            ->make();
     }
 
-    public function generateCards($title, $description, $category, $numCards = 5)
+    public function generateResponse($title, $description, $category, $question)
     {
         try {
-            $prompt = $this->buildPrompt($title, $description, $category, $numCards);
+            $prompt = $this->buildPrompt($title, $description, $category, $question);
             
             $response = $this->client->chat()->create([
-                'model' => 'gpt-4o-mini',
+                'model' => 'google/gemini-2.5-pro-exp-03-25:free',
                 'messages' => [
                     [
                         'role' => 'system',
-                        'content' => 'You are a helpful assistant that creates flashcards for studying. Return the cards in JSON format. Create the results based on the same language of the topic, description and category.'
+                        'content' => 'You are a helpful assistant that response questions. Return the cards in JSON format. Create the results based on the same language of the topic, description and category.'
                     ],
                     [
                         'role' => 'user',
@@ -42,19 +50,19 @@ class CardAIService
         }
     }
 
-    protected function buildPrompt($title, $description, $category, $numCards)
+    protected function buildPrompt($title, $description, $category, $question)
     {
-        return "Create {$numCards} flashcards for studying {$title}. 
+        return "Response the question based on the next values:
+                Title: {$title}. 
                 Description: {$description}
                 Category: {$category}
-
-                **Important**: Ensure that each flashcard is different from previous ones. Avoid repeating similar questions or answers, and try to approach the topic from different angles.
+                Question: {$question}
                 
-                Please return the cards in this JSON format:
+                Please return the answer in this JSON format:
                 {
                     'cards': [
                         {
-                            'question': 'Question text here',
+                            'question': '{$question}',
                             'answer': 'Answer text here'
                         }
                     ]
@@ -66,7 +74,9 @@ class CardAIService
         $content = $response->choices[0]->message->content;
         
         $content = preg_replace('/[\x00-\x1F\x7F]/u', '', $content);
-        
+        $content = str_replace('```json', '', $content);
+        $content = str_replace('```', '', $content);
+
         try {
             $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
             return $data['cards'];

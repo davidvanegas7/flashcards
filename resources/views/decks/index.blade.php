@@ -17,11 +17,17 @@
                         <div class="p-6">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $deck->name }}</h3>
+                                    <h3 class="text-xl font-semibold text-gray-800 mb-2">{{ $deck->name }}
+                                    @if($deck->is_multiple_selection)
+                                    <span class="inline-flex text-center items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-black">
+                                        Multiple
+                                    </span>
+                                    @endif
+                                    </h3>
                                     <p class="text-gray-600 mb-4">{{ $deck->description }}</p>
                                 </div>
-                                <span class="inline-flex w-[100px] max-w-[100px] text-center items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    {{ $deck->cards_count }} {{ __('cards') }}
+                                <span class="inline-flex text-center items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {{ $deck->cards->count() + $deck->expandedCards->count() }} {{ __('cards') }}
                                 </span>
                             </div>
                             

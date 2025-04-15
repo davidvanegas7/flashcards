@@ -3,18 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
+use App\Models\ExpandedCard;
 use App\Models\Deck;
 use App\Services\CardAIService;
+use App\Services\DeckAIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class CardController extends Controller
 {
     protected $cardAIService;
+    protected $deckAIService;
     
-    public function __construct(CardAIService $cardAIService)
+    public function __construct(CardAIService $cardAIService, DeckAIService $deckAIService)
     {
         $this->cardAIService = $cardAIService;
+        $this->deckAIService = $deckAIService;
     }
 
     /**
@@ -70,20 +74,38 @@ class CardController extends Controller
                 abort(403);
             }
 
-            $cards = $this->cardAIService->generateCards(
+            $cards = $this->deckAIService->generateCards(
                 $deck->name,
                 $deck->description,
                 $deck->category->name,
-                30
+                30,
+                $request->mode
             );
 
-            foreach ($cards as $c) {
-                $card = Card::create([
-                    'deck_id' => $deck->id,
-                    'user_id' => auth()->id(),
-                    'question' => $c['question'],
-                    'answer' => $c['answer'],
-                ]);
+            if ($request->mode == 'multiple') {
+                foreach ($cards as $c) {
+                    $card = ExpandedCard::create([
+                        'deck_id' => $deck->id,
+                        'user_id' => auth()->id(),
+                        'question' => $c['question'],
+                        'option1' => $c['option1'],
+                        'option2' => $c['option2'],
+                        'option3' => $c['option3'],
+                        'option4' => $c['option4'],
+                        'answer' => $c['answer'],
+                        'explanation' => $c['explanation'],
+                    ]);
+                }
+            }
+            else {
+                foreach ($cards as $c) {
+                    $card = Card::create([
+                        'deck_id' => $deck->id,
+                        'user_id' => auth()->id(),
+                        'question' => $c['question'],
+                        'answer' => $c['answer'],
+                    ]);
+                }
             }
 
             return response()->json([
@@ -92,6 +114,43 @@ class CardController extends Controller
                 'cards' => $cards,
                 'count' => count($cards)
             ], 200);
+        } catch (\Exception $e) {
+            Log::error(__('Error generating cards') . ': ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => __('Error generating cards'),
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate a response using AI.
+     */
+    public function generateResponseUsingAI(Request $request)
+    {
+        ini_set('max_execution_time', 300);
+
+        try{
+            $deck = Deck::findOrFail($request->deck_id);
+            if ($deck->user_id !== auth()->id()) {
+                abort(403);
+            }
+
+            $cards = $this->cardAIService->generateResponse(
+                $deck->name,
+                $deck->description,
+                $deck->category->name,
+                $request->question
+            );
+
+            foreach ($cards as $c) {
+                return response()->json([
+                    'success'=> true,
+                    'response' => $c['answer'],
+                ], 200);
+            }
         } catch (\Exception $e) {
             Log::error(__('Error generating cards') . ': ' . $e->getMessage());
 
@@ -125,8 +184,8 @@ class CardController extends Controller
     public function update(Request $request, Deck $deck, Card $card)
     {
         $request->validate([
-            'question' => 'required|string|max:255',
-            'answer' => 'required|string|max:255',
+            'question' => 'required|string',
+            'answer' => 'required|string',
             'deck_id' => 'required|exists:decks,id',
         ]);
         $card->update($request->all());
@@ -140,5 +199,11 @@ class CardController extends Controller
     {
         $card->delete();
         return redirect()->route('cards.index', $card->deck_id)->with('success', 'Card deleted successfully');
+    }
+
+    public function playExpandedCards(Deck $deck)
+    {
+        $cards = $deck->expandedCards;
+        return view('play.cards', compact('deck', 'cards'));
     }
 }

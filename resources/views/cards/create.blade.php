@@ -3,7 +3,9 @@
             question: '{{ old('question', '') }}', 
             answer: '{{ old('answer', '') }}',
             showAnswer: false 
-        }">
+        }"
+        @ai-response.window="answer = $event.detail.response"
+        >
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-gray-800">{{ __('Add Card')}}</h2>
@@ -64,6 +66,9 @@
                                 <x-secondary-button type="button" onclick="window.location='{{ route('decks.show', $deck) }}'">
                                     {{ __('Cancel') }}
                                 </x-secondary-button>
+                                <x-secondary-button type="button" x-on:click="generateResponseWithAI({{ $deck->id }}, question)">
+                                    {{ __('AI Answer') }}
+                                </x-secondary-button>
                                 <x-primary-button>
                                     {{ __('Save Card') }}
                                 </x-primary-button>
@@ -113,4 +118,55 @@
             </div>
         </div>
     </div>
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl flex items-center">
+            <svg class="animate-spin h-6 w-6 text-indigo-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-gray-700">{{ __('Generating response with AI...') }}</span>
+        </div>
+    </div>
 </x-app-layout>
+
+<script>
+function generateResponseWithAI(deckId, question) {
+    console.log('Generating response with AI...');
+    const loadingModal = document.getElementById('loadingModal');
+    loadingModal.classList.remove('hidden');
+    loadingModal.classList.add('flex');
+
+    fetch('{{ route("cards.generateResponseAI") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            deck_id: deckId,
+            question: question
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.classList.remove('flex');
+        loadingModal.classList.add('hidden');
+        console.log(data);
+        if (data.success) {
+            window.dispatchEvent(new CustomEvent('ai-response', { 
+                detail: { response: data.response }
+            }));
+        } else {
+            alert('Error generating response');
+        }
+    })
+    .catch(error => {
+        loadingModal.classList.remove('flex');
+        loadingModal.classList.add('hidden');
+        
+        console.error('Error:', error);
+        alert('Error generating response - catch');
+    });
+}
+</script>

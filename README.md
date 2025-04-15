@@ -20,13 +20,15 @@ This is an implementaiton of flashcards using the following stack:
 7. Run `php artisan serve` to start the server.
 
 ## Updates:
-* [X] ~~*Update the welcome view and login/register*~~ [2025-02-13]
-* [X] ~~*Create decks and cards view*~~ [2025-02-13]
-* [X] ~~*Integrating Open AI to create cards only pressing one button*~~ [2025-02-13]
-* [X] ~~*English and Spanish translations*~~ [2025-02-13]
-* [ ] Create study section to study and check progress
-* [ ] Create public decks
-* [ ] Convert the web in a progressive app
+
+-   [x] ~~_Update the welcome view and login/register_~~ [2025-02-13]
+-   [x] ~~_Create decks and cards view_~~ [2025-02-13]
+-   [x] ~~_Integrating Open AI to create cards only pressing one button_~~ [2025-02-13]
+-   [x] ~~_English and Spanish translations_~~ [2025-02-13]
+-   [x] ~~_Create cards with multiple choides_~~ [2025-04-15]
+-   [ ] Create study section to study and check progress
+-   [ ] Create public decks
+-   [ ] Convert the web in a progressive app
 
 ## URL
 
@@ -37,3 +39,4 @@ This is an implementaiton of flashcards using the following stack:
 ![Welcome View](https://github.com/user-attachments/assets/867dcff5-a261-41a7-ac99-30686b676fcd)
 ![Decks View](https://github.com/user-attachments/assets/f0288e15-3d05-4ff8-a4a7-8f5616da13a8)
 ![Deck View](https://github.com/user-attachments/assets/54d2713a-84ca-47dd-866d-b30de60ffc65)
+![Expanded Cards View](https://github.com/user-attachments/assets/4ae04db1-f936-4bb6-ba63-4171cca2dc31)

@@ -16,6 +16,7 @@ class Deck extends Model
         'description',
         'user_id',
         'category_id',
+        'is_multiple_selection',
     ];
 
     public function category(){
@@ -28,5 +29,9 @@ class Deck extends Model
 
     public function cards(){
         return $this->hasMany(Card::class);
+    }
+
+    public function expandedCards(){
+        return $this->hasMany(ExpandedCard::class);
     }
 }
