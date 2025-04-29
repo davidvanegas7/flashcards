@@ -85,7 +85,7 @@ class DeckAIService
         Description: {$description}
         Category: {$category}
 
-        **Important**: Ensure that each flashcard is different from previous ones. Avoid repeating similar questions or answers, and try to approach the topic from different angles.
+        **Important**: Ensure that each flashcard is different from previous ones. Avoid repeating similar questions or answers, and try to approach the topic from different angles. Avoid using single quotes in the questions or answers.
         
         Please return the cards in this JSON format:
         {
