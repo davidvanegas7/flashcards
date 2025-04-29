@@ -23,7 +23,7 @@ class DeckAIService
         ]);
     }
 
-    public function generateCards($title, $description, $category, $numCards = 5, $mode)
+    public function generateCards($title, $description, $category, $numCards = 5, $mode='multiple')
     {
         try {
             $prompt = $this->buildPrompt($title, $description, $category, $numCards, $mode);
