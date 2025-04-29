@@ -2,25 +2,25 @@
 
 namespace App\Services;
 
-use OpenAI\OpenAI;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Client;
 
 class DeckAIService
 {
     protected $client;
+    protected $apiKey;
     
     public function __construct()
     {
-        // $this->client = \OpenAI::client(config('services.openai.api_key'));
-
-        $baseUrl = 'https://openrouter.ai/api/v1'; // Endpoint de OpenRouter
-        $apiKey = config('services.openrouterai.api_key');
-        
-        $this->client = \OpenAI::factory()
-            ->withApiKey($apiKey)
-            ->withBaseUri($baseUrl)
-            ->make();
+        $this->apiKey = config('services.gemini.api_key');
+        $this->client = new Client([
+            'base_uri' => 'https://generativelanguage.googleapis.com/v1beta/',
+            'headers' => [
+                'Content-Type' => 'application/json',
+            ],
+            'timeout' => 300, // 5 minutos de timeout
+            'connect_timeout' => 30, // 30 segundos para la conexión inicial
+        ]);
     }
 
     public function generateCards($title, $description, $category, $numCards = 5, $mode)
@@ -28,23 +28,29 @@ class DeckAIService
         try {
             $prompt = $this->buildPrompt($title, $description, $category, $numCards, $mode);
             
-            $response = $this->client->chat()->create([
-                // 'model' => 'gpt-4o-mini',
-                'model' => 'google/gemini-2.5-pro-exp-03-25:free',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'You are a helpful assistant that creates flashcards for studying. Return the cards in JSON format. Create the results based on the same language of the topic, description and category.'
+            $model = 'gemini-2.0-flash-001';
+            $response = $this->client->post("models/{$model}:generateContent?key={$this->apiKey}", [
+                'json' => [
+                    'contents' => [
+                        [
+                            'parts' => [
+                                [
+                                    'text' => $prompt
+                                ]
+                            ]
+                        ]
                     ],
-                    [
-                        'role' => 'user',
-                        'content' => $prompt
+                    'generationConfig' => [
+                        'temperature' => 0.7,
+                        'topK' => 40,
+                        'topP' => 0.95,
+                        'maxOutputTokens' => 60000,
                     ]
-                ],
-                'temperature' => 0.7,
+                ]
             ]);
 
-            return $this->parseResponse($response);
+            $responseData = json_decode($response->getBody(), true);
+            return $this->parseResponse($responseData);
 
         } catch (\Exception $e) {
             Log::error('Error generating AI cards: ' . $e->getMessage());
@@ -89,7 +95,7 @@ class DeckAIService
 
     protected function parseResponse($response)
     {
-        $content = $response->choices[0]->message->content;
+        $content = $response['candidates'][0]['content']['parts'][0]['text'];
         
         $content = preg_replace('/[\x00-\x1F\x7F]/u', '', $content);
         $content = str_replace('```json', '', $content);
