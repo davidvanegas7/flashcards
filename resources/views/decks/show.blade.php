@@ -69,22 +69,13 @@
                 </div>
             </div>
 
-            <!--  Flashcards -->
+            <!--  PodCards -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 mb-6">
-                        <h2 class="text-xl font-semibold text-gray-800">Flashcards</h2>
+                        <h2 class="text-xl font-semibold text-gray-800">PodCards</h2>
                         @if($deck->user_id === auth()->id())
                             <div class="flex flex-col sm:flex-row w-full sm:w-auto gap-2">
-                                <x-primary-button
-                                    class="w-full sm:w-auto justify-center"
-                                    onclick="generateCardsWithAI({{ $deck->id }}, '{{ $deck->is_multiple_selection ? 'multiple' : 'single' }}')"
-                                >
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    {{ __('Add Cards using AI')}}
-                                </x-primary-button>
                                 @if($deck->is_multiple_selection)
                                 <x-primary-button 
                                     class="w-full sm:w-auto justify-center"

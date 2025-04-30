@@ -3,11 +3,12 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DeckController;
 use App\Http\Controllers\CardController;
+use App\Http\Controllers\DocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     if (Auth::guard('web')->check()) {
-        return redirect('/decks');
+        return redirect('/documents');
     }
     return view('welcome');
 });
@@ -34,6 +35,12 @@ Route::middleware('auth')->group(function () {
     Route::post('decks/cards/generateResponseAI', [CardController::class, 'generateResponseUsingAI'])->name('cards.generateResponseAI');
 
     Route::get('decks/{deck}/expanded-cards', [CardController::class, 'playExpandedCards'])->name('play.expanded-cards');
+
+    Route::get('/documents/create', [DocumentController::class, 'create'])->name('documents.create');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents');
+    Route::get('/documents/{document}', [DocumentController::class, 'show'])->name('documents.show');
+    Route::get('/documents/{document}/status', [DocumentController::class, 'checkStatus'])->name('documents.status');
 });
 
 require __DIR__.'/auth.php';

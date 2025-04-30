@@ -6,17 +6,17 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <div class="navbar-name-logo flex-shrink-0">
-                        <h1 class="text-xl text-white font-bold text-gray-800">FlashCards</h1>
+                        <h1 class="text-xl text-white font-bold text-gray-800">PodCards</h1>
                     </div>
                     <a href="/" class="ml-3">
-                        <img class="navbar-img-logo w-10 h-9" src="{{ asset('img/juego-de-cartas.png') }}" alt="Logo FlashCards">
+                        <img class="navbar-img-logo w-10 h-9" src="{{ asset('img/juego-de-cartas.png') }}" alt="Logo PodCards">
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex text-white hover:text-gray-300">
-                    <x-nav-link :href="route('decks')" :active="request()->routeIs('decks')">
-                        {{ __('Decks') }}
+                    <x-nav-link :href="route('documents')" :active="request()->routeIs('documents')">
+                        {{ __('Documents') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -70,8 +70,8 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('decks')" :active="request()->routeIs('decks')">
-                {{ __('Decks') }}
+            <x-responsive-nav-link :href="route('documents')" :active="request()->routeIs('documents')">
+                {{ __('Documents') }}
             </x-responsive-nav-link>
         </div>
 
