@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('document_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->text('transcript')->nullable();
+            $table->longText('transcript')->nullable();
             $table->string('audio_path')->nullable();
             $table->timestamps();
         });

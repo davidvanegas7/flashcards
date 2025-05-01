@@ -13,9 +13,20 @@ use Smalot\PdfParser\Parser as PdfParser;
 use PhpOffice\PhpWord\IOFactory;
 use Illuminate\Support\Facades\Log;
 use App\Jobs\ProcessDocument;
+use MicrosoftAzure\Storage\Blob\BlobRestProxy;
+use MicrosoftAzure\Storage\Common\Exceptions\ServiceException;
+use MicrosoftAzure\Storage\Blob\Models\CreateBlockBlobOptions;
 
 class DocumentController extends Controller
 {
+    private $blobClient;
+
+    public function __construct()
+    {
+        $connectionString = config('filesystems.disks.azure.connection_string');
+        $this->blobClient = BlobRestProxy::createBlobService($connectionString);
+    }
+
     public function index()
     {
         $documents = Document::where('user_id', auth()->id())
@@ -44,36 +55,48 @@ class DocumentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'document' => 'required|file|mimes:pdf,doc,docx,txt',
+            'document' => 'required|file|mimes:pdf,doc,docx,txt|max:10240', // 10MB
             'title' => 'required|string|max:255',
         ]);
 
         $file = $request->file('document');
-        $path = $file->store('documents');
+        $fileName = uniqid() . '_' . $file->getClientOriginalName();
+        $containerName = config('filesystems.disks.azure.container');
 
-        $document = Document::where('title', $request->title)->where('user_id', auth()->id())->first();
-        if (!$document) {
-            $document = Document::create([
-                'user_id' => auth()->id(),
-                'title' => $request->title,
-                'file_path' => $path,
-                'file_type' => $file->getClientOriginalExtension(),
-                'is_cleaned' => false,
-                'is_processed' => false,
-                'content' => $this->extractTextFromDocument($file),
-            ]);
+        try {
+            // Subir el archivo a Azure Blob Storage
+            $content = fopen($file->getPathname(), 'r');
+            $options = new CreateBlockBlobOptions();
+            $options->setContentType($file->getMimeType());
+            
+            $this->blobClient->createBlockBlob($containerName, $fileName, $content, $options);
+            
+            $document = Document::where('title', $request->title)->where('user_id', auth()->id())->first();
+            if (!$document) {
+                $document = Document::create([
+                    'user_id' => auth()->id(),
+                    'title' => $request->title,
+                    'file_path' => $fileName,
+                    'file_type' => $file->getClientOriginalExtension(),
+                    'is_cleaned' => false,
+                    'is_processed' => false,
+                    'content' => $this->extractTextFromDocument($file),
+                ]);
+            }
+
+            // Despachar el job para procesar el documento en segundo plano
+            ProcessDocument::dispatch($document);
+
+            // Guardar el ID del documento en la sesión
+            session()->put('processing_document_id', $document->id);
+            session()->put('processing', true);
+
+            return redirect()->route('documents.create')
+                ->with('processing', true)
+                ->with('document_id', $document->id);
+        } catch (ServiceException $e) {
+            return back()->with('error', 'Error al subir el archivo: ' . $e->getMessage());
         }
-
-        // Despachar el job para procesar el documento en segundo plano
-        ProcessDocument::dispatch($document);
-
-        // Guardar el ID del documento en la sesión
-        session()->put('processing_document_id', $document->id);
-        session()->put('processing', true);
-
-        return redirect()->route('documents.create')
-            ->with('processing', true)
-            ->with('document_id', $document->id);
     }
 
     public function checkStatus(Document $document)
