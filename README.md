@@ -1,4 +1,4 @@
-# Flashcards
+# PodCards
 
 ## About the project
 
@@ -6,7 +6,7 @@ This is an implementaiton of flashcards using the following stack:
 
 -   Laravel 11.
 -   Vue 3.
--   Open AI API.
+-   Gemini API
 -   Mysql database.
 
 ## Installation
@@ -26,13 +26,14 @@ This is an implementaiton of flashcards using the following stack:
 -   [x] ~~_Integrating Open AI to create cards only pressing one button_~~ [2025-02-13]
 -   [x] ~~_English and Spanish translations_~~ [2025-02-13]
 -   [x] ~~_Create cards with multiple choides_~~ [2025-04-15]
+-   [x] ~~\_Create MVP based on file and creating Podcast~~ [2025-05-29]
 -   [ ] Create study section to study and check progress
 -   [ ] Create public decks
 -   [ ] Convert the web in a progressive app
 
 ## URL
 
-[Flashcards](https://flashcards.davidvanegasdev.com)
+[PodCards](https://podcards.davidvanegasdev.com)
 
 ## Screenshots
 

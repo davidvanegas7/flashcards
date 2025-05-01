@@ -4,10 +4,10 @@
             <!-- Logo and name -->
             <div class="flex items-center">
                 <div class="navbar-name-logo flex-shrink-0">
-                    <h1 class="text-xl text-white font-bold text-gray-800">FlashCards</h1>
+                    <h1 class="text-xl text-white font-bold text-gray-800">PodCards</h1>
                 </div>
                 <a href="/" class="ml-3">
-                    <img class="navbar-img-logo w-10 h-9" src="{{ asset('img/juego-de-cartas.png') }}" alt="Logo FlashCards">
+                    <img class="navbar-img-logo w-10 h-9" src="{{ asset('img/juego-de-cartas.png') }}" alt="Logo PodCards">
                 </a>
             </div>
 

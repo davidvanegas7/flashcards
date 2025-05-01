@@ -17,6 +17,7 @@ class Deck extends Model
         'user_id',
         'category_id',
         'is_multiple_selection',
+        'document_id',
     ];
 
     public function category(){

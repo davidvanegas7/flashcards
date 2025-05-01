@@ -45,6 +45,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('decks', absolute: false));
+        return redirect(route('documents', absolute: false));
     }
 }

@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'azure'),
 
     /*
     |--------------------------------------------------------------------------
@@ -32,10 +32,8 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => storage_path('app/private'),
-            'serve' => true,
+            'root' => storage_path('app'),
             'throw' => false,
-            'report' => false,
         ],
 
         'public' => [
@@ -44,7 +42,6 @@ return [
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
-            'report' => false,
         ],
 
         's3' => [
@@ -58,6 +55,16 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+
+        'azure' => [
+            'driver' => 'azure',
+            'name' => env('AZURE_STORAGE_NAME'),
+            'key' => env('AZURE_STORAGE_KEY'),
+            'container' => env('AZURE_STORAGE_CONTAINER'),
+            'url' => env('AZURE_STORAGE_URL'),
+            'prefix' => null,
+            'connection_string' => env('AZURE_STORAGE_CONNECTION_STRING'),
         ],
 
     ],
