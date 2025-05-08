@@ -127,13 +127,13 @@ class DeckAIService
         // Expresión regular mejorada para identificar estructuras de tarjetas
         // Esta versión es más tolerante con espacios en blanco y permite comillas escapadas dentro de strings
         $pattern = '/{                             
-        \s*"question"\s*:\s*" ( (?:[^"\\\\]|\\\\.)* ) "\s*,
-        \s*"option1"\s*:\s*" ( (?:[^"\\\\]|\\\\.)* ) "\s*,
-        \s*"option2"\s*:\s*" ( (?:[^"\\\\]|\\\\.)* ) "\s*,
-        \s*"option3"\s*:\s*" ( (?:[^"\\\\]|\\\\.)* ) "\s*,
-        \s*"option4"\s*:\s*" ( (?:[^"\\\\]|\\\\.)* ) "\s*,
-        \s*"explanation"\s*:\s*" ( (?:[^"\\\\]|\\\\.)* ) "\s*,
-        \s*"answer"\s*:\s* ( \d+ ) \s*
+        \s*["\']question["\']\s*:\s*["\'] ( (?:[^"\'\\\\]|\\\\.)* ) ["\']\s*,
+        \s*["\']option1["\']\s*:\s*["\'] ( (?:[^"\'\\\\]|\\\\.)* ) ["\']\s*,
+        \s*["\']option2["\']\s*:\s*["\'] ( (?:[^"\'\\\\]|\\\\.)* ) ["\']\s*,
+        \s*["\']option3["\']\s*:\s*["\'] ( (?:[^"\'\\\\]|\\\\.)* ) ["\']\s*,
+        \s*["\']option4["\']\s*:\s*["\'] ( (?:[^"\'\\\\]|\\\\.)* ) ["\']\s*,
+        \s*["\']explanation["\']\s*:\s*["\'] ( (?:[^"\'\\\\]|\\\\.)* ) ["\']\s*,
+        \s*["\']answer["\']\s*:\s* ( \d+ ) \s*
         }/xs';  
         
         if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
