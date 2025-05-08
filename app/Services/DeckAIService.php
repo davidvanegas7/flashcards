@@ -96,17 +96,164 @@ class DeckAIService
     protected function parseResponse($response)
     {
         $content = $response['candidates'][0]['content']['parts'][0]['text'];
-        
+
+        // Limpiar el contenido
         $content = preg_replace('/[\x00-\x1F\x7F]/u', '', $content);
         $content = str_replace('```json', '', $content);
         $content = str_replace('```', '', $content);
+        $content = trim($content);
 
         try {
-            $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            $data = $this->processPartialJson($content);
+
+            if (!isset($data['cards']) || !is_array($data['cards'])) {
+                Log::error('Formato de respuesta inválido: no se encontró la clave "cards" o no es un array');
+                return [];
+            }
             return $data['cards'];
         } catch (\JsonException $e) {
-            Log::error('Error parsing AI response: ' . $content);
-            throw new \Exception('Invalid response format from AI');
+            Log::error('Error parsing AI response: ' . $e->getMessage());
+            Log::error('Contenido recibido: ' . $content);
+            return [];
         }
+        
+    }
+
+    public function processPartialJson($content) 
+    {
+        $validCards = [];
+        $invalidCards = [];
+        
+        // Primero intentamos decodificar el JSON completo
+        try {
+            $data = json_decode($content, true);
+            if (isset($data['cards']) && is_array($data['cards'])) {
+                foreach ($data['cards'] as $index => $card) {
+                    try {
+                        // Validar y procesar cada tarjeta
+                        if (!isset($card['question']) || !isset($card['option1']) || 
+                            !isset($card['option2']) || !isset($card['option3']) || 
+                            !isset($card['option4']) || !isset($card['explanation']) || 
+                            !isset($card['answer'])) {
+                            throw new \Exception("Faltan campos requeridos en la tarjeta");
+                        }
+
+                        // Convertir answer a entero si es string
+                        $answer = is_string($card['answer']) ? (int)$card['answer'] : $card['answer'];
+                        
+                        if ($answer < 1 || $answer > 4) {
+                            throw new \Exception("Respuesta fuera de rango: {$answer}");
+                        }
+
+                        $validCards[] = [
+                            'question' => $card['question'],
+                            'option1' => $card['option1'],
+                            'option2' => $card['option2'],
+                            'option3' => $card['option3'],
+                            'option4' => $card['option4'],
+                            'explanation' => $card['explanation'],
+                            'answer' => $answer
+                        ];
+                        
+                        Log::info("Tarjeta #{$index} procesada correctamente");
+                    } catch (\Exception $e) {
+                        $invalidCards[] = [
+                            'raw' => $card,
+                            'error' => $e->getMessage()
+                        ];
+                        Log::error("Error al procesar tarjeta #{$index}: " . $e->getMessage());
+                    }
+                }
+            } else {
+                throw new \Exception("No se encontró el array 'cards' en el JSON");
+            }
+        } catch (\Exception $e) {
+            Log::error("Error al procesar JSON: " . $e->getMessage());
+            // Si falla el JSON completo, intentamos con el patrón regex como fallback
+            $json = $this->processWithRegex($content);
+            $validCards = $json['cards'];
+            $invalidCards = $json['invalid_cards'];
+        }
+        finally {
+            // Registrar estadísticas del procesamiento
+            $totalFound = count($validCards) + count($invalidCards);
+            Log::info("Procesamiento completado: {$totalFound} tarjetas encontradas, " . 
+                    count($validCards) . " válidas, " . 
+                    count($invalidCards) . " inválidas");
+            
+            return [
+                'cards' => $validCards,
+                'stats' => [
+                    'total_found' => $totalFound,
+                    'valid' => count($validCards),
+                    'invalid' => count($invalidCards)
+                ],
+                'invalid_cards' => $invalidCards
+            ];
+        }
+    }
+
+    protected function processWithRegex($content) 
+    {
+        Log::info("Procesando con regex: " . $content);
+        $validCards = [];
+        $invalidCards = [];
+        
+        // Intenta parsear el contenido como JSON primero
+        $jsonData = json_decode($content, true);
+
+        // Si no es JSON válido, intenta con regex como fallback
+        $pattern = '/[{]\s*[\'"]question[\'"]\s*:\s*[\'"]((?:[^\'"]|\\\\.)*)[\'"]\s*,\s*' .
+                    '[\'"]option1[\'"]\s*:\s*[\'"]((?:[^\'"]|\\\\.)*)[\'"]\s*,\s*' .
+                    '[\'"]option2[\'"]\s*:\s*[\'"]((?:[^\'"]|\\\\.)*)[\'"]\s*,\s*' .
+                    '[\'"]option3[\'"]\s*:\s*[\'"]((?:[^\'"]|\\\\.)*)[\'"]\s*,\s*' .
+                    '[\'"]option4[\'"]\s*:\s*[\'"]((?:[^\'"]|\\\\.)*)[\'"]\s*,\s*' .
+                    '[\'"]explanation[\'"]\s*:\s*[\'"]((?:[^\'"]|\\\\.)*)[\'"]\s*,\s*' .
+                    '[\'"]answer[\'"]\s*:\s*[\'"]?(\d+)[\'"]?\s*[}]/s';
+
+        if (preg_match_all($pattern, $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $index => $match) {
+                try {
+                    $card = [
+                        'question' => stripcslashes($match[1]),
+                        'option1' => stripcslashes($match[2]),
+                        'option2' => stripcslashes($match[3]),
+                        'option3' => stripcslashes($match[4]),
+                        'option4' => stripcslashes($match[5]),
+                        'explanation' => stripcslashes($match[6]),
+                        'answer' => (int)$match[7]
+                    ];
+                    
+                    if ($card['answer'] < 1 || $card['answer'] > 4) {
+                        throw new \Exception("Respuesta fuera de rango: {$card['answer']}");
+                    }
+                    
+                    if (empty($card['question']) || empty($card['option1'])) {
+                        throw new \Exception("Campos obligatorios vacíos");
+                    }
+                    
+                    $validCards[] = $card;
+                    Log::info("Tarjeta #{$index} procesada correctamente con regex");
+                } catch (\Exception $e) {
+                    $invalidCards[] = [
+                        'raw' => $match[0],
+                        'error' => $e->getMessage()
+                    ];
+                    Log::error("Error al procesar tarjeta #{$index} con regex: " . $e->getMessage());
+                }
+            }
+        } else {
+            Log::error("No se encontraron tarjetas con regex ni con JSON");
+        }
+        
+        return [
+            'cards' => $validCards,
+            'stats' => [
+                'total_found' => count($validCards) + count($invalidCards),
+                'valid' => count($validCards),
+                'invalid' => count($invalidCards)
+            ],
+            'invalid_cards' => $invalidCards
+        ];
     }
 }
